@@ -40,17 +40,28 @@ class TranslationService
 
     public static function translateModel(Translation $translation)
     {
-        $en = $translation->en;
-        $keys = array_keys($en);
-        $values = array_values($en);
+        try {
+            $en = $translation->en;
+            $keys = array_keys($en);
+            $values = array_values($en);
+    
+            foreach (self::$languagesArray as $language) {
+                $buffer = array();
 
-        foreach (self::$languagesArray as $language) {
-            $translatedText = self::translate(json_encode($values), $language);
-            $translatedValues = json_decode($translatedText, true);
-            $translation->$language = array_combine($keys, $translatedValues);
-            $translation->save();
+                foreach($values as $value) {
+                    $buffer[] = self::translate($value, $language);
+                }
+
+                try {
+                    $translation->$language = array_combine($keys, $buffer);
+                    $translation->save();
+                } catch (\Exception $e) {
+                    dd($language, $buffer);
+                }
+            }
+            
+            return $translation;
+        } catch (\Exception $e) {
         }
-
-        return $translation;
     }
 }

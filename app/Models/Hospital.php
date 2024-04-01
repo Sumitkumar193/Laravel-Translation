@@ -11,6 +11,12 @@ class Hospital extends Model
 {
     use HasFactory, HasTranslation;
 
+    protected $fillable = [
+        'phone',
+        'email',
+        'website',
+    ];
+
     public function translation()
     {
         return $this->morphOne(Translation::class, 'translatable');

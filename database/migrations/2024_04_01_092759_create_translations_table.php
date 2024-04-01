@@ -15,12 +15,12 @@ class CreateTranslationsTable extends Migration
     {
         Schema::create('translations', function (Blueprint $table) {
             $table->id();
-            $table->json('en')->default(null);
-            $table->json('ar')->default(null);
-            $table->json('fr')->default(null);
-            $table->json('es')->default(null);
-            $table->json('de')->default(null);
-            $table->json('jp')->default(null);
+            $table->json('en');
+            $table->json('ar')->nullable();
+            $table->json('fr')->nullable();
+            $table->json('es')->nullable();
+            $table->json('de')->nullable();
+            $table->json('jp')->nullable();
             $table->morphs('translatable');
             $table->timestamps();
         });

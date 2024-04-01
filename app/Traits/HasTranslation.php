@@ -12,7 +12,11 @@ trait HasTranslation
     public function getTranslatedAttribute()
     {
         $lang = app()->getLocale() ?? 'en';
-        return $this->translation()->first()->$lang;
+        $trans = $this->translation()->first();
+        if (is_null($trans->$lang)) {
+            return $trans->en;
+        }
+        return $trans->$lang;
     }
 
 }

@@ -37,13 +37,27 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
+        Route::bind('lang', function ($value) {
+            return in_array($value, config('app.supported_locales')) ? $value : 'en';
+        });
+
         $this->routes(function () {
             Route::prefix('api')
-                ->middleware('api')
+                ->middleware(['api', 'language'])
                 ->namespace($this->namespace)
                 ->group(base_path('routes/api.php'));
 
             Route::middleware('web')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/web.php'));
+
+            Route::prefix('api/{lang?}')
+                ->middleware(['api', 'language'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/api.php'));
+
+            Route::prefix('{lang?}')
+                ->middleware(['web', 'language'])
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
         });

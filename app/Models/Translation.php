@@ -28,7 +28,7 @@ class Translation extends Model
         'jp' => 'array',
     ];
 
-    public function boot()
+    public static function boot()
     {
         parent::boot();
         Translation::observe(new TranslationObserver);

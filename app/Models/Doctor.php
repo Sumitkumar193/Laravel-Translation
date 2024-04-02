@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Translation;
 
 class Doctor extends Model
 {
@@ -17,9 +16,9 @@ class Doctor extends Model
         'website',
     ];
 
-    public function translation()
+    public function experience()
     {
-        return $this->morphOne(Translation::class, 'translatable');
+        return $this->hasMany(DoctorExp::class);
     }
 
     public function hospitals()

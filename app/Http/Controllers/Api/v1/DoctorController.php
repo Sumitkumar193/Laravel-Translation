@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Doctor;
+use App\Models\DoctorExp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
 class DoctorController extends Controller
 {
+    public $defaultLanguage = config('app.locale') ?? 'en'; 
+
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +19,7 @@ class DoctorController extends Controller
      */
     public function index(Request $request)
     {
-        $doctors = Doctor::with('translation')
+        $doctors = Doctor::with(['experience'])
             ->when($request->has('search') && $request->search !== '', function ($query) use ($request) {
                 $query->whereHas('translation', function ($query) use ($request) {
                     $query->where('en->name', 'like', '%' . $request->search . '%');
@@ -46,6 +49,10 @@ class DoctorController extends Controller
                 'bio' => 'required|string',
                 'education' => 'required|string',
                 'experience' => 'required|string',
+                'hospital_name' => 'required|string',
+                'designation' => 'required|string',
+                'from' => 'required|string',
+                'to' => 'required|string',
             ]);
     
             $doctor = Doctor::create([
@@ -55,7 +62,7 @@ class DoctorController extends Controller
             ]);
     
             $doctor->translation()->create([
-                'en' => [
+                $this->defaultLanguage => [
                     'name' => $request->name,
                     'speciality' => $request->speciality,
                     'bio' => $request->bio,
@@ -63,6 +70,23 @@ class DoctorController extends Controller
                     'experience' => $request->experience
                 ],
             ]);
+
+            $exp = [
+                'hospital_name' => $request->hospital_name,
+                'designation' => $request->designation,
+                'from' => $request->from,
+                'to' => $request->to,
+                'doctor_id' => $doctor->id,
+            ];
+            
+            $docExp = DoctorExp::create($exp);
+            $docExp->translation()->create([
+                $this->defaultLanguage => [
+                    'hospital_name' => $request->hospital_name,
+                    'designation' => $request->designation,
+                ],
+            ]);
+
             DB::commit();
             return response()->json($doctor);
         } catch (\Exception $e) {
@@ -79,7 +103,7 @@ class DoctorController extends Controller
      */
     public function show(Doctor $doctor)
     {
-        return response()->json($doctor);
+        return response()->json($doctor->load(['experience']));
     }
 
     /**
@@ -102,17 +126,35 @@ class DoctorController extends Controller
                 'bio' => 'string',
                 'education' => 'string',
                 'experience' => 'string',
+                'hospital_name' => 'string',
+                'designation' => 'string',
+                'from' => 'string',
+                'to' => 'string',
             ]);
     
             $doctor->update($request->only(['phone', 'email', 'website']));
     
             $doctor->translation()->update([
-                'en' => [
+                $this->defaultLanguage => [
                     'name' => $request->name,
                     'speciality' => $request->speciality,
                     'bio' => $request->bio,
                     'education' => $request->education,
                     'experience' => $request->experience
+                ],
+            ]);
+
+            $doctor->experience()->update([
+                'hospital_name' => $request->hospital_name,
+                'designation' => $request->designation,
+                'from' => $request->from,
+                'to' => $request->to,
+            ]);
+
+            $doctor->experience->translation()->update([
+                $this->defaultLanguage => [
+                    'hospital_name' => $request->hospital_name,
+                    'designation' => $request->designation,
                 ],
             ]);
             DB::commit();

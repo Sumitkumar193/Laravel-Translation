@@ -8,6 +8,8 @@ use App\Models\Hospital;
 
 class HospitalController extends Controller
 {
+    public $defaultLanguage = config('app.locale') ?? 'en'; 
+
     /**
      * Display a listing of the resource.
      *
@@ -50,7 +52,7 @@ class HospitalController extends Controller
         ]);
 
         $hospital->translation()->create([
-            'en' => [
+            $this->defaultLanguage => [
                 'name' => $request->name,
                 'address' => $request->address,
                 'description' => $request->description,
@@ -96,7 +98,7 @@ class HospitalController extends Controller
 
         $hospital->update($hospital_data);
         $hospital->translation()->update([
-            'en' => $hospital_translation_data
+            $this->defaultLanguage => $hospital_translation_data
         ]);
 
         return response()->json(['message' => 'Hospital updated successfully', 'hospital' => $hospital->load('translation')]);

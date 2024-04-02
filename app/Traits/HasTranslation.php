@@ -1,12 +1,18 @@
 <?php 
 
 namespace App\Traits;
+use App\Models\Translation;
 
 trait HasTranslation
 {
     public function initializeHasTranslation()
     {
         $this->append('translated');
+    }
+
+    public function translation()
+    {
+        return $this->morphOne(Translation::class, 'translatable');
     }
 
     public function getTranslatedAttribute()
@@ -17,6 +23,11 @@ trait HasTranslation
             return $trans->en;
         }
         return $trans->$lang;
+    }
+
+    public function trans($key)
+    {
+        return $this->translated[$key];
     }
 
 }

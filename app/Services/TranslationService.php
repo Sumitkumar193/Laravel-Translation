@@ -10,6 +10,8 @@ class TranslationService
     private static $translateClient;
     private static $languagesArray = ['ar', 'fr', 'es', 'de', 'jp'];
 
+    private static $defaultLanguage = config('app.locale');
+
     public static function translate($text, $target)
     {
         if (!self::$translateClient) {
@@ -41,11 +43,15 @@ class TranslationService
     public static function translateModel(Translation $translation)
     {
         try {
-            $en = $translation->en;
-            $keys = array_keys($en);
-            $values = array_values($en);
+            $col = $translation->{self::$defaultLanguage};
+            $keys = array_keys($col);
+            $values = array_values($col);
     
             foreach (self::$languagesArray as $language) {
+                if ($language == self::$defaultLanguage) {
+                    continue;
+                }
+
                 $buffer = array();
 
                 foreach($values as $value) {
@@ -56,7 +62,7 @@ class TranslationService
                     $translation->$language = array_combine($keys, $buffer);
                     $translation->save();
                 } catch (\Exception $e) {
-                    dd($language, $buffer);
+                    \Log::error($e->getMessage());
                 }
             }
             
